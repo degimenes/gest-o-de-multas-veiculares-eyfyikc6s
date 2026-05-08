@@ -1,14 +1,14 @@
-/* Main App Component - Handles routing (using react-router-dom), query client and other providers - use this file to add all routes */
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import Index from './pages/Index'
-import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
-
-// ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
-// AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
+import Dashboard from './pages/Dashboard'
+import Veiculos from './pages/Veiculos'
+import Multas from './pages/Multas'
+import Condutores from './pages/Condutores'
+import Relatorios from './pages/Relatorios'
+import NotFound from './pages/NotFound'
 
 const App = () => (
   <BrowserRouter future={{ v7_startTransition: false, v7_relativeSplatPath: false }}>
@@ -17,8 +17,11 @@ const App = () => (
       <Sonner />
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/veiculos" element={<Veiculos />} />
+          <Route path="/multas" element={<Multas />} />
+          <Route path="/condutores" element={<Condutores />} />
+          <Route path="/relatorios" element={<Relatorios />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
