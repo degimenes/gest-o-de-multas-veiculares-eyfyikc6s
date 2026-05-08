@@ -1,27 +1,16 @@
-export type StatusMulta =
-  | 'PO lançada / Pago'
-  | 'Aguardando boleto'
-  | 'Condutor pendente'
-  | 'Recurso em andamento'
-  | 'Vencida / Urgente'
-  | 'Aguard. notif. penalidade'
+export type StatusMulta = 'Pendente' | 'Pago' | 'Em Recurso'
 
 export interface Multa {
   id: string
-  numero: number
-  veiculo: string
   placa: string
-  fornecedor: string
-  descricao: string
+  veiculo: string
   condutor: string
-  ait: string
-  data: string
-  valorOriginal: number
-  desconto: string
-  valorPagar: number
-  projeto: string
+  valor: number
+  data_infracao: string
+  tipo: string
   status: StatusMulta
-  observacoes: string
+  created?: string
+  updated?: string
 }
 
 export type CategoriaVeiculo = 'Campo Móvel' | 'Campo Fixo' | 'Diretoria'

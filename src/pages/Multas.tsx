@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import useMultasStore from '@/stores/useMultasStore'
-import { DatabaseAlert } from '@/components/DatabaseAlert'
+import { useEffect, useState } from 'react'
+import { getMultas } from '@/services/multas'
+import { useRealtime } from '@/hooks/use-realtime'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -24,18 +24,35 @@ import { MultaDrawer } from './Multas/MultaDrawer'
 import { Multa } from '@/lib/types'
 
 export default function Multas() {
-  const { multas } = useMultasStore()
+  const [multas, setMultas] = useState<Multa[]>([])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const [selectedMulta, setSelectedMulta] = useState<Multa | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
+  const loadData = async () => {
+    try {
+      const items = await getMultas()
+      setMultas(items)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  useRealtime('multas', () => {
+    loadData()
+  })
+
   const filtered = multas.filter((m) => {
     const matchesSearch =
       m.placa.toLowerCase().includes(search.toLowerCase()) ||
-      m.ait.toLowerCase().includes(search.toLowerCase()) ||
-      (m.condutor && m.condutor.toLowerCase().includes(search.toLowerCase()))
+      (m.condutor && m.condutor.toLowerCase().includes(search.toLowerCase())) ||
+      (m.tipo && m.tipo.toLowerCase().includes(search.toLowerCase()))
     const matchesStatus = statusFilter === 'all' || m.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -47,8 +64,6 @@ export default function Multas() {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6">
-      <DatabaseAlert />
-
       <div>
         <h1 className="text-2xl font-bold tracking-tight">CONTROLE DE MULTAS DE TRÂNSITO</h1>
         <p className="text-muted-foreground">Listagem completa e gestão de status das infrações.</p>
@@ -58,7 +73,7 @@ export default function Multas() {
         <div className="relative w-full sm:max-w-md">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por placa, AIT, condutor..."
+            placeholder="Buscar por placa, condutor ou tipo..."
             className="pl-9 bg-background"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -72,11 +87,9 @@ export default function Multas() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="PO lançada / Pago">PO lançada / Pago</SelectItem>
-              <SelectItem value="Aguardando boleto">Aguardando boleto</SelectItem>
-              <SelectItem value="Condutor pendente">Condutor pendente</SelectItem>
-              <SelectItem value="Recurso em andamento">Recurso em andamento</SelectItem>
-              <SelectItem value="Vencida / Urgente">Vencida / Urgente</SelectItem>
+              <SelectItem value="Pendente">Pendente</SelectItem>
+              <SelectItem value="Pago">Pago</SelectItem>
+              <SelectItem value="Em Recurso">Em Recurso</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -87,10 +100,10 @@ export default function Multas() {
           <Table>
             <TableHeader className="bg-muted/50 whitespace-nowrap">
               <TableRow>
-                <TableHead className="w-[100px]">AIT</TableHead>
                 <TableHead>Placa</TableHead>
+                <TableHead>Veículo</TableHead>
                 <TableHead>Data</TableHead>
-                <TableHead className="max-w-[200px]">Descrição</TableHead>
+                <TableHead className="max-w-[200px]">Tipo</TableHead>
                 <TableHead>Condutor</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
                 <TableHead className="text-center">Status</TableHead>
@@ -103,18 +116,18 @@ export default function Multas() {
                   className="cursor-pointer hover:bg-muted/50 transition-colors"
                   onClick={() => openDrawer(m)}
                 >
-                  <TableCell className="font-mono text-xs">{m.ait}</TableCell>
                   <TableCell className="font-mono font-medium">{m.placa}</TableCell>
+                  <TableCell>{m.veiculo}</TableCell>
                   <TableCell className="text-muted-foreground whitespace-nowrap">
-                    {new Date(m.data).toLocaleDateString('pt-BR')}
+                    {new Date(m.data_infracao).toLocaleDateString('pt-BR')}
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate" title={m.descricao}>
-                    {m.descricao}
+                  <TableCell className="max-w-[200px] truncate" title={m.tipo}>
+                    {m.tipo}
                   </TableCell>
                   <TableCell>{m.condutor || '-'}</TableCell>
                   <TableCell className="text-right font-medium">
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                      m.valorPagar,
+                      m.valor,
                     )}
                   </TableCell>
                   <TableCell className="text-center">
