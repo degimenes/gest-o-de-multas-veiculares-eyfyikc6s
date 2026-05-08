@@ -4,9 +4,15 @@ import { FileText, DollarSign, PiggyBank, AlertTriangle } from 'lucide-react'
 
 export function KPICards({ multas }: { multas: Multa[] }) {
   const totalMultas = multas.length
-  const pendentes = multas.filter((m) => m.status === 'Pendente').length
-  const pagos = multas.filter((m) => m.status === 'Pago').length
-  const valorTotal = multas.reduce((acc, curr) => acc + curr.valor, 0)
+  const valorOriginalTotal = multas.reduce(
+    (acc, curr) => acc + (curr.valor_original ?? curr.valor ?? 0),
+    0,
+  )
+  const valorAPagarTotal = multas.reduce(
+    (acc, curr) => acc + (curr.valor_a_pagar ?? curr.valor ?? 0),
+    0,
+  )
+  const economia = valorOriginalTotal - valorAPagarTotal
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
@@ -14,23 +20,23 @@ export function KPICards({ multas }: { multas: Multa[] }) {
   const cards = [
     { title: 'Total de Multas', value: totalMultas, icon: FileText, desc: 'Infrações registradas' },
     {
-      title: 'Multas Pendentes',
-      value: pendentes,
-      icon: AlertTriangle,
-      desc: 'Aguardando pagamento',
-      highlight: pendentes > 0,
-    },
-    {
-      title: 'Multas Pagas',
-      value: pagos,
-      icon: PiggyBank,
-      desc: 'Resolvidas',
-    },
-    {
-      title: 'Valor Total',
-      value: formatCurrency(valorTotal),
+      title: 'Valor Original Total',
+      value: formatCurrency(valorOriginalTotal),
       icon: DollarSign,
-      desc: 'Soma de todas as multas',
+      desc: 'Sem descontos aplicados',
+    },
+    {
+      title: 'Valor a Pagar Total',
+      value: formatCurrency(valorAPagarTotal),
+      icon: AlertTriangle,
+      desc: 'Com descontos (pendente ou pago)',
+      highlight: valorAPagarTotal > 0,
+    },
+    {
+      title: 'Economia c/ Descontos',
+      value: formatCurrency(economia > 0 ? economia : 0),
+      icon: PiggyBank,
+      desc: 'Redução real no custo',
     },
   ]
 

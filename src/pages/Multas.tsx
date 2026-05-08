@@ -87,9 +87,11 @@ export default function Multas() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="Pendente">Pendente</SelectItem>
-              <SelectItem value="Pago">Pago</SelectItem>
+              <SelectItem value="Aguardando boleto">Aguardando boleto</SelectItem>
+              <SelectItem value="Condutor pendente">Condutor pendente</SelectItem>
               <SelectItem value="Em Recurso">Em Recurso</SelectItem>
+              <SelectItem value="Pago">Pago</SelectItem>
+              <SelectItem value="Vencida / Urgente">Vencida / Urgente</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -121,13 +123,13 @@ export default function Multas() {
                   <TableCell className="text-muted-foreground whitespace-nowrap">
                     {new Date(m.data_infracao).toLocaleDateString('pt-BR')}
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate" title={m.tipo}>
-                    {m.tipo}
+                  <TableCell className="max-w-[200px] truncate" title={m.descricao || m.tipo}>
+                    {m.descricao || m.tipo}
                   </TableCell>
                   <TableCell>{m.condutor || '-'}</TableCell>
                   <TableCell className="text-right font-medium">
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                      m.valor,
+                      m.valor_a_pagar ?? m.valor ?? 0,
                     )}
                   </TableCell>
                   <TableCell className="text-center">

@@ -4,6 +4,7 @@ import { getMultas } from '@/services/multas'
 import { useRealtime } from '@/hooks/use-realtime'
 import { KPICards } from './Dashboard/KPICards'
 import { DashboardCharts } from './Dashboard/DashboardCharts'
+import { ResumoTables } from './Dashboard/ResumoTables'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { CadastrarMultaDialog } from '@/components/CadastrarMultaDialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -55,6 +56,8 @@ export default function Dashboard() {
       <KPICards multas={multas} />
       <DashboardCharts multas={multas} />
 
+      <ResumoTables multas={multas} />
+
       <Card className="animate-fade-in-up" style={{ animationDelay: '600ms' }}>
         <CardHeader>
           <CardTitle className="text-base">Infrações Recentes</CardTitle>
@@ -81,7 +84,7 @@ export default function Dashboard() {
                   <TableCell>{multa.condutor || 'Não identificado'}</TableCell>
                   <TableCell className="text-right">
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                      multa.valor,
+                      multa.valor_a_pagar ?? multa.valor ?? 0,
                     )}
                   </TableCell>
                   <TableCell className="text-center">
